@@ -51,30 +51,30 @@ class Graph:
         nx.draw_networkx_edges(G, pos, width=6)
         nx.draw_networkx_labels(G, pos, font_size=7, font_family='sans-serif')
 
-        # AI 
+        # AI start
         edge_labels = {(str(edge.node1), str(edge.node2)): f"{edge.viable_score}" for node in self.vertexList for edge in self.incidentEdges(node).values()}
         nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
-        #
+        # AI end
 
         plt.axis('off')
         plt.show()
 
 #testing
-nodeA = Node(1)
-nodeB = Node(2)
-nodeC = Node(3)
+# nodeA = Node(1)
+# nodeB = Node(2)
+# nodeC = Node(3)
 
-vertexList = {}
+# vertexList = {}
 
-nodeA = Node(1)
-nodeB = Node(2)
-nodeC = Node(3)
-graph = Graph(vertexList)
-graph.createEdge(nodeA, nodeB, 1.0)
-graph.createEdge(nodeA, nodeC, 2.0)
-graph.createEdge(nodeB, nodeC, 21.0)
+# nodeA = Node(1)
+# nodeB = Node(2)
+# nodeC = Node(3)
+# graph = Graph(vertexList)
+# graph.createEdge(nodeA, nodeB, 1.0)
+# graph.createEdge(nodeA, nodeC, 2.0)
+# graph.createEdge(nodeB, nodeC, 21.0)
 
-graph.visualize_graph()
+# graph.visualize_graph()
 
 # print(graph.incidentEdges(nodeA))
 # print(graph.incidentEdges(nodeB))

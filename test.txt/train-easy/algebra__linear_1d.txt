@@ -1,0 +1,6 @@
+Solve -128 + 98 = 5*b for b.
+-6
+Solve 9*o + 272 = 77*o for o.
+4
+Solve 37*b - 4*b = 0 for b.
+0
