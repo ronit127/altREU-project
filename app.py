@@ -1,3 +1,4 @@
+import random
 import streamlit as st
 import time
 import numpy as np 
@@ -6,115 +7,137 @@ from node import Node, Question
 from graph import Graph
 from learning import ExpertGraph
 
-# questions = [
-#     {   
-#         "key": 0,
-#         "question": "What is the capital of France?",
-#         "options": ["Berlin", "London", "Paris", "Madrid"],
-#         "answer": "Paris",
-#         "skills": ["expressions", "linear equations"]
-#     },
-#     {   
-#         "key": 1,
-#         "question": "What is 2 + 2?",
-#         "options": ["3", "4", "5", "6"],
-#         "answer": "4",
-#         "skills": ["expressions", "quadratic equations"]
-#     },
-#     {   
-#         "key": 2,
-#         "question": "What is the largest planet in our solar system?",
-#         "options": ["Earth", "Mars", "Jupiter", "Saturn"],
-#         "answer": "Jupiter",
-#         "skills": ["inequalities"]
-#     }
-# ]
 
-# question_list = [Node(key = q["key"], skills = q["skills"], question = Question(q["question"], q["options"], q["answer"])) for q in questions] # AI-assisted line
+st.title("Personalized Learning App")
 
-# if 'expert' not in st.session_state:
-#     graph = Graph({})
-#     graph.createEdge(question_list[0], question_list[1], -1.0)
-#     graph.createEdge(question_list[1], question_list[2], -1.0)  
-#     st.session_state.expert = ExpertGraph(graph)
+if 'hasSubmit' not in st.session_state:
+    st.session_state.hasSubmit = False
 
-# if 'score' not in st.session_state:
-#     st.session_state.score = 0
+skills = ["skill 1", "skill 2", "skill 3"] # to update
 
-# if 'current_question' not in st.session_state:
-#     st.session_state.current_question = st.session_state.expert.nextQuestion()
+if 'pre_skills' not in st.session_state:
+    st.session_state.pre_skills = []
 
-# def display_question(question: Question):
-#     st.write(question.prompt)
-#     user_answer = st.radio("Choose an answer:", question.options)
-#     return user_answer
+if not st.session_state.hasSubmit:
+    st.write("What are your previous skills?")
+    for skill in skills:
+        if st.checkbox(skill):
+            st.session_state.pre_skills.append(skill)
 
-# def check_answer(user_answer, correct_answer, skills):
-#     if user_answer == correct_answer:
-#         st.success("Correct!")
-#         st.session_state.expert.updateSkills(skills, True)
-#         st.session_state.score += 1
-#     else:
-#         st.error(f"Wrong! The correct answer is {correct_answer}.")
-#         st.session_state.expert.updateSkills(skills, False)
+    if st.button("Submit", key="submit_skills"):
+        st.session_state.hasSubmit = True
+        st.rerun()
 
-# st.title("Personalized Learning App")
+if st.session_state.hasSubmit:
+    st.write(random.choice(st.session_state.pre_skills)) # randomly chooses the skill DEBUG
+    questions = [
+        {   
+            "key": 0,
+            "question": "What is the capital of France?",
+            "options": ["Berlin", "London", "Paris", "Madrid"],
+            "answer": "Paris",
+            "skills": ["expressions", "linear equations"]
+        },
+        {   
+            "key": 1,
+            "question": "What is 2 + 2?",
+            "options": ["3", "4", "5", "6"],
+            "answer": "4",
+            "skills": ["expressions", "quadratic equations"]
+        },
+        {   
+            "key": 2,
+            "question": "What is the largest planet in our solar system?",
+            "options": ["Earth", "Mars", "Jupiter", "Saturn"],
+            "answer": "Jupiter",
+            "skills": ["inequalities"]
+        }
+    ]
 
-# reminder = st.write("(Make sure to update how you feel whilst answering the questions. Good luck!)")
+    question_list = [Node(skills = q["skills"], question = Question(q["question"], q["options"], q["answer"])) for q in questions] # AI-assisted line
 
-# st.write()
-# st.write()
-# st.write()
+    if 'expert' not in st.session_state:
+        graph = Graph({})
+        graph.createEdge(question_list[0], question_list[1], -1.0)
+        graph.createEdge(question_list[1], question_list[2], -1.0)  
+        st.session_state.expert = ExpertGraph(graph)
 
-# if 'motivation' not in st.session_state:
-#     st.session_state.motivation = 0.5
+    if 'score' not in st.session_state:
+        st.session_state.score = 0
 
-# if 'comfort' not in st.session_state:
-#     st.session_state.comfort = 0.5
+    if 'current_question' not in st.session_state:
+        st.session_state.current_question = st.session_state.expert.nextQuestion()
 
-# def update_point(x, y): 
-#     st.session_state.expert.motivation = x
-#     st.session_state.expert.comfort = y
-#     st.session_state.motivation = x 
-#     st.session_state.comfort = y 
+    def display_question(question: Question):
+        st.write(question.prompt)
+        user_answer = st.radio("Choose an answer:", question.options)
+        return user_answer
 
-
-# if st.session_state.current_question is not None:
-#     current_q = st.session_state.current_question
-#     user_answer = display_question(current_q.question)
-
-#     if st.button("Submit"):
-
-#         check_answer(user_answer, current_q.question.answer, current_q.skills)
-#         if st.session_state.expert.availableQuestions():
-#             st.session_state.current_question = st.session_state.expert.nextQuestion()
-#         else:
-#             st.session_state.current_question = None
-
-#         time.sleep(2)
-#         st.rerun()
-# else:
-#     st.write(f"Quiz completed! Your score is {st.session_state.score}/{len(questions)}.")
+    def check_answer(user_answer, correct_answer, skills):
+        if user_answer == correct_answer:
+            st.success("Correct!")
+            st.session_state.expert.updateSkills(skills, True)
+            st.session_state.score += 1
+        else:
+            st.error(f"Wrong! The correct answer is {correct_answer}.")
+            st.session_state.expert.updateSkills(skills, False)
 
 
-# st.write(" ")
-# st.write(" ")
-# st.write(" ")
-# st.write(" ")
+    reminder = st.write("(Make sure to update how you feel whilst answering the questions. Good luck!)")
 
-# motivation = st.slider("Rate your motivation (0 - 1)", 0.0, 1.0, st.session_state.motivation) 
-# comfort = st.slider("Rate your comfort (0 - 1)", 0.0, 1.0, st.session_state.comfort) 
-# update_point(motivation, comfort) 
+    st.write()
+    st.write()
+    st.write()
 
-# fig, ax = plt.subplots() 
-# ax.set_xlim(0, 1)
-# ax.set_ylim(0, 1) 
-# ax.set_xlabel('User Comfort') 
-# ax.set_ylabel('User Motivation') 
-# ax.grid() 
-# ax.plot(st.session_state.motivation, st.session_state.comfort, 'ro') 
+    if 'motivation' not in st.session_state:
+        st.session_state.motivation = 0.5
 
-# st.pyplot(fig) 
+    if 'comfort' not in st.session_state:
+        st.session_state.comfort = 0.5
+
+    def update_point(x, y): 
+        st.session_state.expert.motivation = x
+        st.session_state.expert.comfort = y
+        st.session_state.motivation = x 
+        st.session_state.comfort = y 
+
+
+    if st.session_state.current_question is not None:
+        current_q = st.session_state.current_question
+        user_answer = display_question(current_q.question)
+
+        if st.button("Submit", key = "submit_ans"):
+
+            check_answer(user_answer, current_q.question.answer, current_q.skills)
+            if st.session_state.expert.availableQuestions():
+                st.session_state.current_question = st.session_state.expert.nextQuestion()
+            else:
+                st.session_state.current_question = None
+
+            time.sleep(2)
+            st.rerun()
+    else:
+        st.write(f"Quiz completed! Your score is {st.session_state.score}/{len(questions)}.")
+
+
+    st.write(" ")
+    st.write(" ")
+    st.write(" ")
+    st.write(" ")
+
+    motivation = st.slider("Rate your motivation (0 - 1)", 0.0, 1.0, st.session_state.motivation) 
+    comfort = st.slider("Rate your comfort (0 - 1)", 0.0, 1.0, st.session_state.comfort) 
+    update_point(motivation, comfort) 
+
+    fig, ax = plt.subplots() 
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1) 
+    ax.set_xlabel('User Comfort') 
+    ax.set_ylabel('User Motivation') 
+    ax.grid() 
+    ax.plot(st.session_state.motivation, st.session_state.comfort, 'ro') 
+
+    st.pyplot(fig) 
 
 
 
