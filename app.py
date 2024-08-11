@@ -54,9 +54,12 @@ if st.session_state.hasSubmit:
         }
     ]
 
-    question_list = [Node(skills = q["skills"], question = Question(q["question"], q["options"], q["answer"])) for q in questions] # AI-assisted line
+    question_list = [Node(topic = q["skills"][0], question = Question(q["question"], q["options"], q["answer"])) for q in questions] # AI-assisted line
 
     if 'expert' not in st.session_state:
+        #generating a faux graph for testing
+
+        #TODO: for testing can you generate a list of questions (via genQuestion()) then insert them into the graph creating random edges and making sure everything is being displayed
         graph = Graph({})
         graph.createEdge(question_list[0], question_list[1], -1.0)
         graph.createEdge(question_list[1], question_list[2], -1.0)  
@@ -73,14 +76,14 @@ if st.session_state.hasSubmit:
         user_answer = st.radio("Choose an answer:", question.options)
         return user_answer
 
-    def check_answer(user_answer, correct_answer, skills):
+    def check_answer(user_answer, correct_answer, topic):
         if user_answer == correct_answer:
             st.success("Correct!")
-            st.session_state.expert.updateSkills(skills, True)
+            st.session_state.expert.updateTopic(topic, True)
             st.session_state.score += 1
         else:
             st.error(f"Wrong! The correct answer is {correct_answer}.")
-            st.session_state.expert.updateSkills(skills, False)
+            st.session_state.expert.updateTopic(topic, False)
 
 
     reminder = st.write("(Make sure to update how you feel whilst answering the questions. Good luck!)")
@@ -108,7 +111,7 @@ if st.session_state.hasSubmit:
 
         if st.button("Submit", key = "submit_ans"):
 
-            check_answer(user_answer, current_q.question.answer, current_q.skills)
+            check_answer(user_answer, current_q.question.answer, current_q.topic)
             if st.session_state.expert.availableQuestions():
                 st.session_state.current_question = st.session_state.expert.nextQuestion()
             else:

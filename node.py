@@ -8,12 +8,9 @@ class Question:
         
 class Node:
     #node contains name(string), skills(list of strings), difficulty(double)
-    def __init__(self, key: int = None, name: str = None, skills: List[str] = None, difficulty: float = None, question: Question = None) -> None:
+    def __init__(self, key: int = None, name: str = None, topic: str = None, difficulty: float = None, question: Question = None) -> None:
         self.name = name
-        if skills is None:
-            skills = []
-        else:
-            self.skills = skills
+        self.topic = topic
         self.difficulty = difficulty
         self.key = key
         self.question = question

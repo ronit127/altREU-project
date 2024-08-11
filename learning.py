@@ -12,36 +12,35 @@ import subprocess
 class ExpertGraph:
     def __init__(self, the_graph : Graph):
        self.graph = the_graph 
-       self.skills_prob : Dict[str, Tuple[float,float]] = {} # maps a skill to a pair of input/output of a sigmoid graph
-       self.loadSkills()
+       self.topics_prob : Dict[str, Tuple[float,float]] = {} # maps a skill to a pair of input/output of a sigmoid graph
+       # TODO: generate the graph
+       self.loadTopics()
        self.motivation = 0.5
        self.comfort = 0.5
        self.questions_complete = 0
 
-    def loadSkills(self, value = 0.25):
+    def loadTopics(self, value = 0.25):
+        """Loads a baseline probability of 0.25 for all the topics once the graph has been constructed"""
         for node, edges in self.graph.vertexList.items():
-            for skill in node.skills:
-                if skill in self.skills_prob:
-                    self.skills_prob[skill] = [0,0.25]
+            if node.topic in self.topics_prob:
+                self.topics_prob[node.topic] = [0,0.25]
 
-    def updateSkills(self, skills : List[str], isCorrect):
-        for skill in skills:
-            if skill in self.skills_prob:
-                if isCorrect: self.skills_prob[skill][0] += 0.2
-                else: self.skills_prob[skill][0] -= 0.2
-                self.skills_prob[skill][1] = self.sigmoid(self.skills_prob[skill][0])
+    
+    def updateTopic(self, topic : str, isCorrect):
+            """Updates the estimated probability of the topic of the question answered depending on whether it is correct or not"""
+            if topic in self.topics_prob:
+                if isCorrect: self.topics_prob[topic][0] += 0.2
+                else: self.topics_prob[topic][0] -= 0.2
+                self.topics_prob[topic][1] = self.sigmoid(self.topics_prob[topic][0])
     
     def sigmoid(self, x) -> float:
         return 1 / (1+ math.exp(-(x-1.09861)))  
     
     def computeNodeProb(self, node : Node) -> float:
-        skill_list = []
-        for i in node.skills:
-            if self.skills_prob.__contains__(i):
-                skill_list.append(self.skills_prob[i])
-        return np.min(skill_list)
+        return self.topics_prob[node.topic].second
     
     def changeItUp(expr : str):
+        """Generates similar variants of an expression by changing the numbers in the expression. Accounts for double negatives, and avoids 0's"""
         nums = re.findall(r'-?\d+',expr)
         #print(nums)
         lis = []
@@ -71,6 +70,8 @@ class ExpertGraph:
         return new_expr
 
     def genQuestion(self, topic : str):  
+        """Generates a question of a given topic returning a Question object"""
+
         result = subprocess.getoutput(f'python -m mathematics_dataset.generate --filter={topic} --per_train_module=1 --per_test_module=1')
 
         print(result)
@@ -79,18 +80,15 @@ class ExpertGraph:
         question = pair[0].strip()
         answer = pair[1].strip()
         
-        print(f"Question: {question}")
-        print(f"Answer: {answer}")
+        #print(f"Question: {question}")
+        #print(f"Answer: {answer}")
 
         options = self.changeItUp(answer)
         options.append(answer)
         random.shuffle(options)
         #ans = int(answer)
         
-        for i in options:
-            print(i)
-        
-        return [question, answer, options]
+        return Question(question, options, answer)
         
     def nextQuestion(self) -> Node:
         randomNode : Node = random.choice(list(self.graph.vertexList.keys()))
@@ -104,10 +102,6 @@ class ExpertGraph:
     def heurestic(node: Node) -> float:
         pass
 
-
-#  self.skills_prob["linear"] = 0.25
-#  self.skills_prob["quadratic"] = 0.29
-a_node = Node(1, skills = ["linear", "quadratic"])
 
 # curr_node = Node()
 
