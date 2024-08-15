@@ -7,16 +7,20 @@ class Question:
         self.answer = answer
         
 class Node:
-    #node contains name(string), skills(list of strings), difficulty(double)
-    def __init__(self, key: int = None, name: str = None, topic: str = None, difficulty: float = None, question: Question = None) -> None:
+    
+    def __init__(self, key, name: str = None, topic: str = None, difficulty: float = None, question: Question = None) -> None:
+        '''node contains name(string), skills(list of strings), difficulty(double)'''
         self.name = name
         self.topic = topic
         self.difficulty = difficulty
         self.key = key
         self.question = question
 
-    # def __init__(self, key) -> None:
-    #     self.key = key
-
     def __repr__(self):
         return f"Node({self.key})"
+    
+    def __eq__(self, other):
+        return isinstance(other, Node) and self.key == other.key
+
+    def __hash__(self):
+        return hash(self.key)

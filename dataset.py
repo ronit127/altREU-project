@@ -2,8 +2,20 @@ import random
 import subprocess
 import ast
 import re
+import time
 
 import numpy as np
+from learning import ExpertGraph
+
+expert = ExpertGraph("linear_1d", "differentiate")
+
+print("hee")
+expert.updateViability()
+print("haw")
+expert.graph.visualize_graph()
+
+
+
 
 def genQuestion(topic : str):
     
@@ -73,8 +85,9 @@ def changeItUp(expr : str):
 
 def genQuestion2(topic : str):
     result = subprocess.getoutput(f'python -m mathematics_dataset.generate --filter={topic} --per_train_module=1 --per_test_module=1')
-
-    print(result)
+    result = result.replace("\n", "")
+    result = result[result.find("["):]
+    print("Result: " + result)
     qa_pairs = ast.literal_eval(result)
     pair = qa_pairs[0]
     question = pair[0].strip()
@@ -94,5 +107,4 @@ def genQuestion2(topic : str):
     return [question, answer, options]
 
 #print(changeItUp("[4,-9.7]"))
-genQuestion2('polynomial_roots')
-
+#genQuestion2('time')
