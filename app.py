@@ -1,4 +1,5 @@
 import random
+import re
 import streamlit as st
 import time
 import numpy as np 
@@ -6,7 +7,6 @@ import matplotlib.pyplot as plt
 from node import Node, Question
 from graph import Graph
 from learning import ExpertGraph
-
 
 st.title("Personalized Learning App")
 
@@ -65,7 +65,7 @@ if st.session_state.hasSubmit:
     if 'expert' not in st.session_state:
     
         with st.spinner('Loading Questions...'):
-            st.session_state.expert = ExpertGraph(random.choice(st.session_state.pre_skills), st.session_state.post_skill)
+            st.session_state.expert = ExpertGraph(st.session_state.pre_skills, st.session_state.post_skill)
             finished = st.success("Finished!", icon="✅")
             time.sleep(3)
             finished.empty()
@@ -76,9 +76,33 @@ if st.session_state.hasSubmit:
     if 'current_question' not in st.session_state:
         st.session_state.current_question = st.session_state.expert.nextQuestion()
 
+    col1, col2 = st.columns(2)
+
+    def latex_format(expression: str): 
+        #multiplication cases 
+        expression = re.sub(r'\*\*(-?\d+)', r'$^{\1}$', expression)  #ai assisted 
+        expression = re.sub(r'\*\(', '(', expression)
+        expression = re.sub(r'\*([a-zA-Z])', r'\1', expression)
+        expression = re.sub(r'(-?\d+)\*(-?\d+)', r'$\1 \\times \2$', expression)
+        
+        #fraction cases
+        expression = re.sub(r'(-?\d+)/(-?\d+)', r'$\\frac{\1}{\2}$', expression)
+        expression = re.sub(r'\(([^)]+)\)/\(([^)]+)\)', r'$\\frac{(\1)}{(\2)}$', expression)
+        expression = re.sub(r'(\d+)/\(([^)]+)\)', r'$\\frac{\1}{(\2)}$', expression)
+        expression = re.sub(r'\(([^)]+)\)/(\d+)', r'$\\frac{(\1)}{\2}$', expression)
+
+        #sqrt case
+        expression = re.sub(r'sqrt\(([^)]+)\)', r'$\\sqrt{\1}$', expression)
+
+        return expression
+
     def display_question(question: Question):
-        st.write(question.prompt)
-        user_answer = st.radio("Choose an answer:", question.options)
+        
+        st.write(latex_format(question.prompt))
+        choices = []
+        for option in question.options:
+            choices.append(latex_format(option))  
+        user_answer = st.radio("Choose an answer:", choices)
         return user_answer
 
     def check_answer(user_answer, correct_answer, topic):
@@ -87,8 +111,9 @@ if st.session_state.hasSubmit:
             st.session_state.expert.updateTopic(topic, True)
             st.session_state.score += 1
         else:
-            st.error(f"Wrong! The correct answer is {correct_answer}.")
+            st.error(f"Wrong! The correct answer is {latex_format(correct_answer)}.")
             st.session_state.expert.updateTopic(topic, False)
+        st.session_state.expert.updateViability()
 
     st.write()
     st.write()
@@ -98,22 +123,21 @@ if st.session_state.hasSubmit:
         st.session_state.expert.motivation = x
         st.session_state.expert.comfort = y
 
-
-
     if st.session_state.current_question is not None:
-        current_q = st.session_state.current_question
-        user_answer = display_question(current_q.question)
+        with col1:
+            current_q = st.session_state.current_question
+            user_answer = display_question(current_q.question)
 
-        if st.button("Submit", key = "submit_ans"):
+            if st.button("Submit", key = "submit_ans"):
 
-            check_answer(user_answer, current_q.question.answer, current_q.topic)
-            if st.session_state.expert.availableQuestions():
-                st.session_state.current_question = st.session_state.expert.nextQuestion()
-            else:
-                st.session_state.current_question = None
+                check_answer(user_answer, current_q.question.answer, current_q.topic)
+                if st.session_state.expert.availableQuestions():
+                    st.session_state.current_question = st.session_state.expert.nextQuestion()
+                else:
+                    st.session_state.current_question = None
 
-            time.sleep(2)
-            st.rerun()
+                time.sleep(2)
+                st.rerun()
     else:
         #st.write(f"Quiz completed! Your score is {st.session_state.score}/{len(questions)}.")
         pass
@@ -123,21 +147,22 @@ if st.session_state.hasSubmit:
     st.write(" ")
     st.write(" ")
 
-    motivation = st.slider("Rate your motivation (0 - 1)", 0.0, 1.0, st.session_state.expert.motivation) 
-    comfort = st.slider("Rate your comfort (0 - 1)", 0.0, 1.0, st.session_state.expert.comfort) 
-    update_point(motivation, comfort) 
+    with col2:
+        motivation = st.slider("Rate your motivation (0 - 1)", 0.0, 1.0, st.session_state.expert.motivation) 
+        comfort = st.slider("Rate your comfort (0 - 1)", 0.0, 1.0, st.session_state.expert.comfort) 
+        update_point(motivation, comfort) 
 
-    fig, ax = plt.subplots() 
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1) 
-    ax.set_xlabel('User Comfort') 
-    ax.set_ylabel('User Motivation') 
-    ax.grid() 
-    ax.plot(st.session_state.expert.motivation, st.session_state.expert.comfort, 'ro') 
+        fig, ax = plt.subplots() 
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1) 
+        ax.set_xlabel('User Comfort') 
+        ax.set_ylabel('User Motivation') 
+        ax.grid() 
+        ax.plot(st.session_state.expert.motivation, st.session_state.expert.comfort, 'ro') 
 
-    st.pyplot(fig) 
+        st.pyplot(fig) 
 
-    st.write("Make sure to update how you feel whilst answering the questions")
+        st.write("Make sure to update how you feel whilst answering the questions")
 
 
 

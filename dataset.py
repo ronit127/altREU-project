@@ -7,15 +7,14 @@ import time
 import numpy as np
 from learning import ExpertGraph
 
-expert = ExpertGraph("linear_1d", "differentiate")
+expert = ExpertGraph(["sequence_next_term"], "mul")
 
 print("hee")
 expert.updateViability()
 print("haw")
 expert.graph.visualize_graph()
 
-
-
+#print(expert.nextQuestion().topic)
 
 def genQuestion(topic : str):
     
