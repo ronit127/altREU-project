@@ -33,6 +33,8 @@ skill_map = {
     "Finding more advanced derivatives (second, third, etc.)": "differentiate_composed"
 }
 
+col1, col2 = st.columns(2, gap="large")
+
 if 'pre_skills' not in st.session_state:
     st.session_state.pre_skills = []
 
@@ -40,23 +42,29 @@ if 'post_skill' not in st.session_state:
     st.session_state.post_skill = "linear_2d"
 
 if not st.session_state.hasSubmit:
-    st.write("What are your previous skills?")
 
-    skills = list(skill_map.keys())
-    for skill in skills:
-        if st.checkbox(skill):
-            st.session_state.pre_skills.append(skill_map[skill])
+    with col1:
+        st.subheader("What are your skills?")
+
+        skills = list(skill_map.keys())
+        for skill in skills:
+            if st.checkbox(skill):
+                st.session_state.pre_skills.append(skill_map[skill])
 
     st.write(" ")
 
-    chosen_goal = st.radio("What is your goal?", skills)
+    with col2:
+        st.subheader("What is your goal?")
+        chosen_goal = st.radio("goal", skills, label_visibility = "hidden")
 
-    if chosen_goal:
-        st.session_state.post_skill = skill_map[chosen_goal]
+        if chosen_goal:
+            st.session_state.post_skill = skill_map[chosen_goal]
 
-    if st.button("Submit", key="submit_skills"):
-        st.session_state.hasSubmit = True
-        st.rerun()
+        if st.button("Submit", key="submit_skills"):
+            st.session_state.hasSubmit = True
+            st.rerun()
+
+time.sleep(1)
 
 if st.session_state.hasSubmit:
 

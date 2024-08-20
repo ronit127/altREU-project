@@ -1,2 +1,2 @@
 # altREU-project
-![alt text](image.png)
+![Alt text](relative%20path/to/image.png?raw=true "PNG")
