@@ -1,2 +1,4 @@
 # altREU-project
-![image](https://github.com/user-attachments/assets/2d34586c-fbff-4a6e-acbf-bd2697c3b820)
+![alt text](image.png)
+
+Personalized Mathematics Learning Application: randomly generates and organizes a series of questions using a graph that considers goal skills. The tutor algorithm chooses questions according to your performance and mental state (tracking motivation and comfort through interactable sliders). 
