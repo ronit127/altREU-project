@@ -1,0 +1,17 @@
+add_or_sub
+add_sub_multiple
+time
+sequence_next_term
+sequence_nth_term
+mul
+div
+mul_div_multiple
+nearest_integer_root
+simplify_surd
+mixed
+conversion
+linear_1d
+linear_2d
+polynomial_roots
+differentiate
+differentiate_composed

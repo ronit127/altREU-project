@@ -1,6 +1,0 @@
-linear_1d
-linear_2d
-polynomial_roots
-mixed //arithmetic
-sequence_next_term
-sequence_nth_term

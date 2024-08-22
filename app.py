@@ -55,7 +55,7 @@ if not st.session_state.hasSubmit:
 
     with col2:
         st.subheader("What is your goal?")
-        chosen_goal = st.radio("goal", skills, label_visibility = "hidden")
+        chosen_goal = st.radio("goal", skills, label_visibility = "collapsed")
 
         if chosen_goal:
             st.session_state.post_skill = skill_map[chosen_goal]
@@ -144,7 +144,6 @@ if st.session_state.hasSubmit:
                 else:
                     st.session_state.current_question = None
 
-                time.sleep(2)
                 st.rerun()
     else:
         #st.write(f"Quiz completed! Your score is {st.session_state.score}/{len(questions)}.")
