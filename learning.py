@@ -66,9 +66,9 @@ SKILL_TOPICS = skillTree()[1]
 def heuristic(node1: Node, node2: Node) -> float:
         '''function that returns the estimated cost of travelling to the end (should be high if far away in the skill tree)'''
         #print("heuristic called")
-        #shortest_distance = nx.shortest_path_length(SKILL_TREE, node1.topic, node2.topic)
-
+        # shortest_distance = nx.shortest_path_length(SKILL_TREE, node1.topic, node2.topic)
         return abs(SKILL_TOPICS.index(node1.topic) - SKILL_TOPICS.index(node2.topic))
+
 
 class ExpertGraph:
     def __init__(self, topics: str, ending: str): #skill_tree : Graph
@@ -242,25 +242,45 @@ class ExpertGraph:
         return graph
       
 
-    def genQuestion(self, topic : str):  
-        """Generates a question of a given topic returning a Question object"""
-        result = subprocess.getoutput(f'python -m mathematics_dataset.generate --filter={topic} --per_train_module=1 --per_test_module=1')
-        result = result.replace("\n", "")
-        result = result[result.find("["):]
-        #print(f"Result: {topic}")
-        #print(result)
-        qa_pairs = ast.literal_eval(result)
-        pair = qa_pairs[0]
-        question = pair[0].strip()
-        answer : str = pair[1].strip()
-        
-        #print(f"Question: {question}")
-        #print(f"Answer: {answer}")
+    def clean_ansi_codes(self, text):
+        """Remove ANSI escape sequences (colors, bold, etc.) from text"""
+        ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        return ansi_escape.sub('', text)
 
+    def genQuestion(self, topic : str):  
+        """Extract question and answer using ASCII/ANSI codes as delimiters"""
+        result = subprocess.getoutput(f'python -m mathematics_dataset.generate --filter={topic} --per_train_module=1 --per_test_module=1')
+    
+        clean_result = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '|SPLIT|', result)  # AI assisted regex
+
+        parts = [part.strip() for part in clean_result.split('|SPLIT|') if part.strip()] 
+        
+        question = None
+        answer = None
+        
+        for part in parts:
+            if '?' in part or any(op in part for op in ['*', '/', '(', ')', '+', '-']):
+                if not part.startswith(('train/', 'interpolate/', 'extrapolate/')):
+                    question = part.strip()
+                    break
+        
+        if question:
+            question_index = parts.index(question)
+            for i in range(question_index + 1, min(len(parts), question_index + 5)):
+                part = parts[i].strip()
+                if re.match(r'^-?\d+(/\d+)?(\.\d+)?$', part):
+                    answer = part
+                    break
+        
+        print(f"\nExtracted Question: {question}")
+        print(f"Extracted Answer: {answer}")
+        
+        if not question or not answer:
+            return Question("What is 2 + 2?", ["3", "4", "5", "6"], "4")
+ 
         options = self.changeItUp(answer)
         options.append(answer)
         random.shuffle(options)
-        #ans = int(answer)
         
         return Question(question, options, answer)
       
@@ -307,9 +327,6 @@ class ExpertGraph:
             curr_score += (1 - self.comfort) * 5 * ((self.topics_prob[u.topic][1] - self.topics_prob[v.topic][1] + 1) / 2 )
 
             self.graph.updateEdge(u,v, curr_score)
-
-    
-
 
 # curr_node = Node()
 

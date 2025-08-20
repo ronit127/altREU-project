@@ -86,23 +86,33 @@ if st.session_state.hasSubmit:
 
     col1, col2 = st.columns(2)
 
-    def latex_format(expression: str): 
-        #multiplication cases 
-        expression = re.sub(r'\*\*(-?\d+)', r'$^{\1}$', expression)  #ai assisted 
-        expression = re.sub(r'\*\(', '(', expression)
-        expression = re.sub(r'\*([a-zA-Z])', r'\1', expression)
-        expression = re.sub(r'(-?\d+)\*(-?\d+)', r'$\1 \\times \2$', expression)
+    def latex_format(expression: str):  
+        """LaTeX formatter for mathematical expressions in Streamlit"""
         
-        #fraction cases
-        expression = re.sub(r'(-?\d+)/(-?\d+)', r'$\\frac{\1}{\2}$', expression)
-        expression = re.sub(r'\(([^)]+)\)/\(([^)]+)\)', r'$\\frac{(\1)}{(\2)}$', expression)
-        expression = re.sub(r'(\d+)/\(([^)]+)\)', r'$\\frac{\1}{(\2)}$', expression)
-        expression = re.sub(r'\(([^)]+)\)/(\d+)', r'$\\frac{(\1)}{\2}$', expression)
-
-        #sqrt case
-        expression = re.sub(r'sqrt\(([^)]+)\)', r'$\\sqrt{\1}$', expression)
-
-        return expression
+        # Clean up the input
+        expression = expression.strip()
+        
+       
+        expression = re.sub(r'\*\*(-?\d+)', r'^{\1}', expression)
+        
+        expression = re.sub(r'\(([^()]+)\)/\(([^()]+)\)', r'\\frac{(\1)}{(\2)}', expression)
+        
+        expression = re.sub(r'(\d+)/\(([^)]+)\)', r'\\frac{\1}{(\2)}', expression)
+        expression = re.sub(r'\(([^)]+)\)/(\d+)', r'\\frac{(\1)}{\2}', expression)
+        
+        expression = re.sub(r'(-?\d+)/(-?\d+)', r'\\frac{\1}{\2}', expression)
+        
+        expression = re.sub(r'\*\(', r'(', expression)
+        # Remove * before variables
+        expression = re.sub(r'\*([a-zA-Z])', r'\1', expression)
+        # Replace number*number with times symbol
+        expression = re.sub(r'(-?\d+)\*(-?\d+)', r'\1 \\times \2', expression)
+      
+        expression = re.sub(r'\*', r' \\cdot ', expression)
+   
+        expression = re.sub(r'sqrt\(([^)]+)\)', r'\\sqrt{\1}', expression)
+       
+        return f"$${expression}$$"
 
     def display_question(question: Question):
         
